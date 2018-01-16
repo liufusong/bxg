@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.4",
+    "express-session": "^1.15.6",
+    "mysql": "^2.15.0"
+  }
+}
