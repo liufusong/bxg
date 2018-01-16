@@ -10,32 +10,31 @@ const path = require('path');
  
 const app = express();
 
-const cookie = require('cookie-parser');
-app.use(cookie())
+// const cookie = require('cookie-parser');
+// app.use(cookie())
 const cors = require('cors');
-
-const session = require('express-session');  
-app.use(session({  
-    resave: true, // don't save session if unmodified  
-    saveUninitialized: false, // don't create session until something stored  
-    secret: 'dafdsafdsfdsaf'  
-}));  
-
 app.use(cors())
- 
-app.use(bodyParser.urlencoded({ extended: false }))
 
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use('/node_modules', express.static('./node_modules'))
 const sqlObj = sql.createConnection({
     host:'127.0.0.1',
     user:'root',
     password:'',
     database:'bxg'
 })
-// app.all('*',function(req,res,next){
-//     res.header('Access-Control-Allow-Origin','http://localhost:8080');
-//     res.header('Access-Control-Allow-Credentials',true)
-//     next();
-// });
+
+const session = require('express-session')
+app.use(session({
+  secret: 'iuiouyyefefsdfsdwe097&^*(((', // 表示 用来对 SessionId 加密的 字符串，这个字符串，大家任意写
+  resave: false, // 如果为 true ， 表示强制把 Session 存储到 物理磁盘上，从而保证Session不会丢失
+  saveUninitialized: false // 如果为 true，表示 强制没有“初始化”的session 保存到storage中
+}))
+app.all('*',function(req,res,next){
+    res.header('Access-Control-Allow-Origin','http://localhost:8080');
+    res.header('Access-Control-Allow-Credentials',true)
+    next();
+});
 app.post('/api/login',(req,res)=>{    
     const name = req.body.user_name;
     const password = req.body.password;
@@ -45,27 +44,20 @@ app.post('/api/login',(req,res)=>{
     sqlObj.query(sqlStr,(err,data)=>{
         if(!data||data.length<1){
            obj.message = '对不起，账号名和密码不正确';
-           obj.err_code = 0;
-          
+           obj.err_code = 0;        
         }else{
            obj.message = data
            obj.err_code = 1;
-           req.session.user = data   
-           res.cookie('user', data, { expires: new Date(Date.now() + 900000), httpOnly: true });
-           console.log(req.cookies.resc)
-        }                    
+        }     
+        // req.session.sign = true;
+        // req.session.name = '汇智网'   
         res.json(obj)     
     })
-    
 })
-app.get('/sec',(req,res)=>{
-    res.cookie('user', '123', { expires: new Date(Date.now() + 900000), httpOnly: true });
-    console.log(req.cookies)
-    res.json(req.cookies)
-})
-app.get('/api/islogin',(req,res)=>{
-   console.log(req.cookies)
-    res.json({cookie:req.cookies})
+app.get('/login',(req,res)=>{
+    console.log(req.session.name);//打印session的值
+    res.send('welecome <strong>' + 123 + '</strong>, 欢迎你再次登录');
+    // res.json({session:req.session})
     // var is;
     // if(!req.session.user){
     //     console.log('未登录')
@@ -78,7 +70,11 @@ app.get('/api/islogin',(req,res)=>{
     // res.json({is}) 
 })
 
-
+// app.post('/api/login',  (req, res)=>{
+//     req.session.sign = true;
+//     req.session.name = '12312321'
+//     res.end('欢迎登陆！');
+// });
  
 app.listen(2000,()=>{
 console.log('running as http://127.0.0.1:2000')
