@@ -43,9 +43,11 @@ app.post('/api/login',(req,res)=>{
     const obj = {};
     sqlObj.query(sqlStr,(err,data)=>{
         if(!data||data.length<1){
-           obj.message = '对不起，账号名和密码不正确';
+           obj.message = "对不起，用户名或者密码不正确";
+           obj.tip = 0;
            obj.err_code = 0;        
         }else{
+            obj.tip = 1;
            obj.message = data
            obj.err_code = 1;
         }     
